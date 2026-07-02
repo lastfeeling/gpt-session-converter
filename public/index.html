@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChatGPT / Codex 本地转 CPA / sub2api</title>
+  <meta name="description" content="单文件离线工具：粘贴 JSON、JSONL、Codex tokens、ChatGPT Web session 或 sub2api bundle，浏览器本地转换为 CPA 或 sub2api，不上传内容。" />
+  <meta name="referrer" content="no-referrer" />
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #121821;
+      --panel2: #0f151d;
+      --text: #edf2f7;
+      --muted: #8b98a8;
+      --line: #243040;
+      --accent: #61e0b8;
+      --accent2: #7aa7ff;
+      --danger: #ff6b7a;
+      --warn: #ffc76b;
+      --ok: #7dffa7;
+      --shadow: 0 24px 80px rgba(0,0,0,.35);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 0%, rgba(97,224,184,.16), transparent 32rem),
+        radial-gradient(circle at 95% 12%, rgba(122,167,255,.14), transparent 34rem),
+        linear-gradient(180deg, #0b0f14 0%, #070a0e 100%);
+      font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .wrap { width: min(1120px, calc(100vw - 32px)); margin: 0 auto; padding: 40px 0 56px; }
+    header { display:flex; justify-content:space-between; gap:24px; align-items:flex-start; margin-bottom: 24px; }
+    h1 { margin:0; font-size: clamp(24px, 3.4vw, 40px); letter-spacing:-.03em; line-height:1.1; }
+    .subtitle { margin: 12px 0 0; color: var(--muted); max-width: 760px; font-size: 15px; }
+    .badge { color: var(--accent); border:1px solid rgba(97,224,184,.28); background: rgba(97,224,184,.08); padding:8px 12px; border-radius:999px; white-space:nowrap; font-size:13px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    @media (max-width: 900px) { header { display:block; } .badge { display:inline-block; margin-top:16px; } .grid { grid-template-columns:1fr; } }
+    .card { background: var(--panel); border:1px solid rgba(255,255,255,.08); border-radius: var(--radius); box-shadow: var(--shadow); overflow:hidden; }
+    .card-h { padding:16px 18px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; gap:16px; align-items:center; }
+    .card-h strong { font-size:15px; }
+    .card-b { padding: 18px; }
+    textarea {
+      width:100%; background: #070b10; color: var(--text); border:1px solid #263241; border-radius:14px;
+      padding:14px 15px; outline:none; resize: vertical; font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    #input { min-height: 340px; }
+    #output { min-height: 300px; }
+    textarea:focus { border-color: rgba(97,224,184,.72); box-shadow: 0 0 0 4px rgba(97,224,184,.08); }
+    .row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; align-items:center; }
+    button, .filebtn {
+      border:0; border-radius:12px; padding:11px 15px; color:#06100d; background: var(--accent); font-weight: 700;
+      cursor:pointer; transition: transform .12s ease, opacity .12s ease; text-decoration:none; display:inline-flex; align-items:center; gap:8px; font-size:14px;
+    }
+    button:hover, .filebtn:hover { transform: translateY(-1px); }
+    button.secondary, .filebtn.secondary { color: var(--text); background:#1b2633; border:1px solid #2c3a4d; }
+    button:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+    input[type=file] { display:none; }
+    .hint { color: var(--muted); font-size: 13px; }
+    .modes { display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+    .modes label { flex:1 1 200px; cursor:pointer; border:1px solid var(--line); border-radius:14px; padding:12px 14px; background: var(--panel2); }
+    .modes input { margin-right:8px; accent-color: var(--accent); }
+    .modes span { display:block; color: var(--muted); font-size:12px; margin:4px 0 0 24px; }
+    .opts { display:flex; gap:16px; flex-wrap:wrap; margin-top:14px; color:var(--muted); font-size:13px; }
+    .opts label { display:flex; align-items:center; gap:7px; cursor:pointer; }
+    .opts input { accent-color: var(--accent); }
+    .status { margin-top:14px; padding:12px 14px; border-radius:12px; background: #0b1118; border: 1px solid var(--line); color: var(--muted); white-space:pre-wrap; font-size:13px; }
+    .status.ok { color: var(--ok); border-color: rgba(125,255,167,.28); background: rgba(125,255,167,.06); }
+    .status.warn { color: var(--warn); border-color: rgba(255,199,107,.32); background: rgba(255,199,107,.07); }
+    .status.err { color: var(--danger); border-color: rgba(255,107,122,.32); background: rgba(255,107,122,.07); }
+    .stats { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .kv { flex:1 1 120px; border:1px solid var(--line); border-radius:12px; padding:11px 13px; background: var(--panel2); }
+    .kv span { display:block; color:var(--muted); font-size:12px; margin-bottom:4px; }
+    .kv b { font-size:18px; font-weight:700; }
+    .fine { margin-top:20px; color: var(--muted); font-size:12.5px; line-height:1.6; }
+    .fine b { color: var(--text); }
+    code { background:#0b1118; border:1px solid var(--line); border-radius:6px; padding:1px 5px; font-family: ui-monospace, Menlo, Consolas, monospace; }
+    a { color: var(--accent); text-underline-offset: 3px; }
+    a:hover { color: var(--accent2); }
+    .footer { margin-top: 22px; text-align:center; color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div>
+        <h1>ChatGPT / Codex 本地转 CPA / sub2api</h1>
+        <p class="subtitle">单文件离线工具。粘贴 JSON、JSONL、Codex tokens、ChatGPT Web session 或 sub2api bundle，浏览器本地转换，不上传内容。使用说明：把卡密 / ChatGPT Web session 复制或导入，然后直接转换为 CPA 或 sub2api 格式。</p>
+      </div>
+      <div class="badge">本地离线 · 不联网</div>
+    </header>
+
+    <section class="grid">
+      <div class="card">
+        <div class="card-h"><strong>1. 输入</strong><span class="hint">JSON / JSONL / session / CPA / sub2api</span></div>
+        <div class="card-b">
+          <textarea id="input" spellcheck="false" placeholder='在此粘贴：
+· ChatGPT session JSON（含 accessToken / user / account）
+· Codex auth.json（含 tokens.access_token）
+· CPA JSON（含 type: codex）
+· 多行 JSONL，每行一个账号
+· sub2api 导出的 bundle（数组）'></textarea>
+          <div class="row">
+            <label class="filebtn secondary" for="file">读取文件</label>
+            <input id="file" type="file" accept="application/json,.json,.jsonl,.txt" multiple />
+            <button class="secondary" id="sample">示例</button>
+            <button class="secondary" id="clear">清空</button>
+            <button id="detect">识别</button>
+          </div>
+          <div class="opts">
+            <label><input type="checkbox" id="backfill" checked /> 回填 claims（从 JWT 解析 email / account_id / 过期时间）</label>
+          </div>
+          <div class="stats">
+            <div class="kv"><span>识别记录数</span><b id="statRecords">0</b></div>
+            <div class="kv"><span>回填 claims</span><b id="statClaims">0</b></div>
+            <div class="kv"><span>无 refresh_token</span><b id="statNoRefresh">0</b></div>
+          </div>
+          <div id="status" class="status">等待输入。</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><strong>2. 输出</strong><span class="hint">CPA / sub2api</span></div>
+        <div class="card-b">
+          <div class="modes" aria-label="输出模式">
+            <label><input type="radio" name="mode" value="cpa" checked />CPA（CLIProxyAPI / Codex auth）<span>每个账号一份 JSON，多账号打包为 .tar</span></label>
+            <label><input type="radio" name="mode" value="sub2api" />sub2api bundle<span>合并为一个数组，直接批量导入</span></label>
+          </div>
+          <div class="row">
+            <button id="convert">转换</button>
+            <button class="secondary" id="copy" disabled>复制</button>
+            <button class="secondary" id="download" disabled>下载</button>
+          </div>
+          <textarea id="output" spellcheck="false" readonly placeholder="尚未生成"></textarea>
+          <p class="hint" id="outNote">多账号 CPA 会下载 .tar，包内每个账号一个 JSON 文件。</p>
+        </div>
+      </div>
+    </section>
+
+    <p class="fine">
+      <b>安全边界：</b>这个页面不加载外部脚本，不请求任何接口；转换逻辑全部在当前 HTML 内执行。处理敏感 token 时，建议断网后本地打开。<br>
+      <b>说明：</b>session JSON 通常不含真正的 OAuth <code>refresh_token</code>。缺失时 CPA 会写入占位 <code>rt_0</code>，JWT 过期后自动刷新可能失效。
+    </p>
+    <footer class="footer">单文件离线转换工具 · 部署于 Cloudflare Workers</footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

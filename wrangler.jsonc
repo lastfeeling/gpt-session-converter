@@ -1,0 +1,10 @@
+{
+  // Cloudflare Workers 配置（静态资源模式，无需后端代码）
+  // 文档: https://developers.cloudflare.com/workers/static-assets/
+  "name": "gpt-session-converter",
+  "compatibility_date": "2025-06-01",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "single-page-application"
+  }
+}

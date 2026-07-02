@@ -1,0 +1,14 @@
+{
+  "name": "gpt-session-converter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "单文件离线工具：ChatGPT session / Codex tokens 本地转 CPA / sub2api，部署在 Cloudflare Workers。",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "start": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.20.0"
+  }
+}
