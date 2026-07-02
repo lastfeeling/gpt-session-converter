@@ -469,12 +469,26 @@
   }
 
   // ---------- sample ----------
+  // 模拟 chatgpt.com/api/auth/session 的真实返回结构：
+  // 没有顶层 account 字段，account_id / plan / email 都在 accessToken 的 JWT claims 里。
+  const SAMPLE_ACCESS_TOKEN =
+    "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJkZW1vQGV4YW1wbGUuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsidXNlcl9pZCI6InVzZXItREVNTzAwMDAwMDAwMDAwMDAwMDAiLCJjaGF0Z3B0X2FjY291bnRfaWQiOiJhMWIyYzNkNC01ZTZmLTc4OTAtYWJjZC1lZjEyMzQ1Njc4OTAiLCJjaGF0Z3B0X3BsYW5fdHlwZSI6InBsdXMifSwiaXNzIjoiaHR0cHM6Ly9hdXRoLm9wZW5haS5jb20iLCJzdWIiOiJ1c2VyLURFTU8wMDAwMDAwMDAwMDAwMDAwIiwiYXVkIjoiaHR0cHM6Ly9hcGkub3BlbmFpLmNvbS92MSIsImlhdCI6MTczMDAwMDAwMCwiZXhwIjo0ODY1NDkxMjAwfQ.SIGNATURE_PLACEHOLDER";
   const SAMPLE = JSON.stringify(
     {
-      user: { email: "demo@example.com" },
-      account: { id: "acc_demo_123" },
-      accessToken: "eyJhbGciOiJERUZBVUxUIn0.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsiY2hhdGdwdF9hY2NvdW50X2lkIjoiYWNjX2RlbW9fMTIzIn0sImV4cCI6NDg2NTQ5MTIwMH0.sig",
-      expires: "2099-01-01T00:00:00Z",
+      user: {
+        id: "user-DEMO0000000000000000",
+        name: "Demo User",
+        email: "demo@example.com",
+        image: "https://example.com/avatar.png",
+        picture: "https://example.com/avatar.png",
+        idp: "openai",
+        iat: 1730000000,
+        mfa: false,
+        groups: [],
+      },
+      expires: "2099-01-01T00:00:00.000Z",
+      accessToken: SAMPLE_ACCESS_TOKEN,
+      authProvider: "auth0",
     },
     null,
     2
