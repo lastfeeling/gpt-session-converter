@@ -12,13 +12,11 @@
 
 ## 一键部署到 Cloudflare
 
-把本仓库推送到 GitHub 后，点下面的按钮（把链接里的 `<你的用户名>/<仓库名>` 换成你的仓库）：
+点下面的按钮即可一键部署：
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/<你的用户名>/<仓库名>)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/lastfeeling/gpt-session-converter)
 
 Cloudflare 会克隆仓库、读取 `wrangler.jsonc`，把 `public/` 目录作为静态资源发布成一个 Worker。全程无需本地安装依赖。
-
-> README 里的按钮链接指向 `https://github.com/<你的用户名>/<仓库名>`，请务必改成你自己的仓库地址。
 
 ## 推送到 GitHub
 
